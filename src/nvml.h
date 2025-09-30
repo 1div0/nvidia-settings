@@ -11752,11 +11752,95 @@ typedef struct
  *        - \ref NVML_ERROR_INVALID_ARGUMENT            if \p device or \p buffer are invalid
  *        - \ref NVML_ERROR_NO_PERMISSION               if user does not have permission to perform this operation
  *        - \ref NVML_ERROR_NOT_SUPPORTED               if this feature is not supported by the device
- *        - \ref NVML_ERROR_ARGUMENT_VERSION_MISMATCH   if the version specified in \p buffer is not supported
  */
 nvmlReturn_t DECLDIR nvmlDeviceReadWritePRM_v1(nvmlDevice_t device, nvmlPRMTLV_v1_t *buffer);
 
 /** @} */
+
+/**
+ * PRM Counter IDs
+ */
+typedef enum
+{
+    NVML_PRM_COUNTER_ID_NONE = 0,
+    /* Physical Layer Counters (PPCNT group 0x12) */
+    NVML_PRM_COUNTER_ID_PPCNT_PHYSICAL_LAYER_CTRS_LINK_DOWN_EVENTS = 1,
+    NVML_PRM_COUNTER_ID_PPCNT_PHYSICAL_LAYER_CTRS_SUCCESSFUL_RECOVERY_EVENTS = 2,
+    /* Recovery counters (PPCNT group 0x1A) */
+    NVML_PRM_COUNTER_ID_PPCNT_RECOVERY_CTRS_TOTAL_SUCCESSFUL_RECOVERY_EVENTS = 101,
+    NVML_PRM_COUNTER_ID_PPCNT_RECOVERY_CTRS_TIME_SINCE_LAST_RECOVERY = 102,
+    NVML_PRM_COUNTER_ID_PPCNT_RECOVERY_CTRS_TIME_BETWEEN_LAST_TWO_RECOVERIES = 103,
+    /* Infiniband PortCounters Attribute (PPCNT group 0x20) */
+    NVML_PRM_COUNTER_ID_PPCNT_PORTCOUNTERS_PORT_XMIT_WAIT = 201,
+    /* PLR counters (PPCNT group 0x22) */
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_RCV_CODES = 301,
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_RCV_CODE_ERR = 302,
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_RCV_UNCORRECTABLE_CODE = 303,
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_XMIT_CODES = 304,
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_XMIT_RETRY_CODES = 305,
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_XMIT_RETRY_EVENTS = 306,
+    NVML_PRM_COUNTER_ID_PPCNT_PLR_SYNC_EVENTS = 307,
+    /* PPRM counters */
+    NVML_PRM_COUNTER_ID_PPRM_OPER_RECOVERY = 1001,
+} nvmlPRMCounterId_t;
+
+/**
+ * PRM counter input values
+ */
+typedef struct
+{
+    unsigned int localPort;                 //!< Local port number
+} nvmlPRMCounterInput_v1_t;
+
+/**
+ * PRM Counter Value Structure
+ */
+typedef struct
+{
+    nvmlReturn_t status;                    //!< Status of the PRM counter read
+    nvmlValueType_t outputType;             //!< Output value type
+    nvmlValue_t outputValue;                //!< Output value
+} nvmlPRMCounterValue_v1_t;
+
+/**
+ * PRM Counter Structure v1
+ */
+typedef struct
+{
+    unsigned int counterId;                 //!< Counter ID, one of \ref nvmlPRMCounterId_t
+    /* Input data */
+    nvmlPRMCounterInput_v1_t inData;        //!< PRM input values
+    /* Output counter value */
+    nvmlPRMCounterValue_v1_t counterValue;  //!< Counter value
+} nvmlPRMCounter_v1_t;
+
+/**
+ * PRM Counter List Structure v1
+ */
+typedef struct
+{
+    unsigned int numCounters;               //!< Number of counters
+    nvmlPRMCounter_v1_t *counters;          //!< Pointer to array of PRM counters
+} nvmlPRMCounterList_v1_t;
+
+/**
+ * Read a list of GPU PRM Counters.
+ *
+ * For Blackwell &tm; or newer fully supported devices.
+ *
+ * Supported on Linux only.
+ *
+ * @param device                                    Identifer of target GPU device
+ * @param counterList                               Structure holding the input parameters as well as the retrieved counter values
+ *
+ * @return
+ *        - \ref NVML_SUCCESS                           on success
+ *        - \ref NVML_ERROR_INVALID_ARGUMENT            if \p device is invalid or \p counterList is NULL
+ *        - \ref NVML_ERROR_NO_PERMISSION               if user does not have permission to perform this operation
+ *        - \ref NVML_ERROR_NOT_SUPPORTED               if this feature is not supported by the device
+ *        - \ref NVML_ERROR_UNKNOWN                     on any other error
+ */
+nvmlReturn_t DECLDIR nvmlDeviceReadPRMCounters_v1(nvmlDevice_t device, nvmlPRMCounterList_v1_t *counterList);
 
 /***************************************************************************************************/
 /** @defgroup nvmlMultiInstanceGPU Multi Instance GPU Management
